@@ -31,7 +31,17 @@ func OAuth(r *ghttp.Request) {
 		return
 	}
 	respJson := gjson.New(resp.ReadAllString())
+
 	if len(respJson.Get("data.list").Array()) == 0 {
+		r.Response.Status = 200
+		r.Response.WriteJson(g.Map{
+			"code": 0,
+			"msg":  "无效的激活码",
+		})
+		return
+	}
+
+	if respJson.Get("data.list.0.userToken").String() != token {
 		r.Response.Status = 200
 		r.Response.WriteJson(g.Map{
 			"code": 0,
