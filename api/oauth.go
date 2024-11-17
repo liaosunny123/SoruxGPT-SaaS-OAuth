@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"time"
 )
 
 func OAuth(r *ghttp.Request) {
@@ -46,6 +47,24 @@ func OAuth(r *ghttp.Request) {
 		r.Response.WriteJson(g.Map{
 			"code": 0,
 			"msg":  "无效的激活码",
+		})
+		return
+	}
+
+	if !respJson.Get("data.list.0.deleted_at").IsNil() {
+		r.Response.Status = 200
+		r.Response.WriteJson(g.Map{
+			"code": 0,
+			"msg":  "激活码已被删除！",
+		})
+		return
+	}
+
+	if respJson.Get("data.list.0.expireTime").Time().Before(time.Now()) {
+		r.Response.Status = 200
+		r.Response.WriteJson(g.Map{
+			"code": 0,
+			"msg":  "激活码已过期！",
 		})
 		return
 	}
